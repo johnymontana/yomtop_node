@@ -3,7 +3,7 @@
 <html>
   <head>
 
-    !-- Latest compiled and minified CSS -->
+
       <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
       <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -74,44 +74,42 @@
       <div id="myTabContent" class="tab-content">
 
         <div class="tab-pane fade in" id="overview">
-	        <p>Overview information here.</p>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">About</h3>
+                </div>
+
+                <div class="panel-body">
+                    This application is a proof of concept demonstration of a group collaborative filtering recommender system using data from the <a href="http://www.yelp.com/dataset_challenge/">Yelp Dataset Challenge</a>. For more information check out this paper or the github repo here.
+                </div>
+            </div>
         </div>
 
 
 	<div class="tab-pane fade in active" id="hypothesis">
         <div>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox1" value="mejx9Ya_tOvFRBosjPqfKQ"> mejx9Ya_tOvFRBosjPqfKQ
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox2" value="xqQMyOzggrDR3vQ82b79tw"> xqQMyOzggrDR3vQ82b79tw
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox3" value="PkL1_hGEl3r069k7DrBAcA"> PkL1_hGEl3r069k7DrBAcA
-            </label>
+            <form>
+                <h4>Select User(s)</h4>
 
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox1" value="TWUQw8nmKAkUv7gzPWS4Pw"> TWUQw8nmKAkUv7gzPWS4Pw"
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox2" value="OzbDvzLS7FP42GV4QPTUGA"> OzbDvzLS7FP42GV4QPTUGA"
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox3" value="j71lD0BgYWxOK5TAncpb-Q"> j71lD0BgYWxOK5TAncpb-Q
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox1" value="Fxzn1yDq9NKWgJlroA8--Q""> Fxzn1yDq9NKWgJlroA8--Q"
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox2" value="">
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" id="inlineCheckbox3" value="">
-            </label>
+                <input type="checkbox" value="mejx9Ya_tOvFRBosjPqfKQ" style="margin-left: 10px;"> Bob
+
+                <input type="checkbox" value="xqQMyOzggrDR3vQ82b79tw" style="margin-left: 10px;"> Alex
+
+                <input type="checkbox" value="PkL1_hGEl3r069k7DrBAcA" style="margin-left: 10px;"> Jennifer
+
+                <input type="checkbox" value="TWUQw8nmKAkUv7gzPWS4Pw" style="margin-left: 10px;"> Celina
+
+                <input type="checkbox" value="OzbDvzLS7FP42GV4QPTUGA" style="margin-left: 10px;"> Silas
+
+                <input type="checkbox" value="j71lD0BgYWxOK5TAncpb-Q" style="margin-left: 10px;"> John
+
+                <input type="checkbox" value="Fxzn1yDq9NKWgJlroA8--Q" style="margin-left: 10px;"> Maxine
+
             <br>
-            <br>
-            <button type="button" id="rec_btn" class="btn btn-primary btn-lg">Get recommended!</button>
-            <br>
+            <button type="button" id="rec_btn" class="btn btn-primary btn-lg" style="margin: 10px;">Get recommended!</button>
+                <br>
+                Recommendations will appear as annotations in map below.
+            </form>
             <hr>
         </div>
         <div class="panel panel-info">
@@ -135,6 +133,7 @@
   </body>
 
     <script>
+        var markerLayer;
         var baseLayer = L.tileLayer('http://{s}.tile.cloudmade.com/ab7393729f6047c695f84e4a00d4a876/997/256/{z}/{x}/{y}.png', { attribution: 'YoMTop', minZoom: 2, maxZoom: 18});
 
         //var marker = new L.Marker(new L.LatLng(33.5237259,-112.0486848));
@@ -162,18 +161,22 @@
             $.ajax({
                 //url: "http://yomtop.sb01.stations.graphenedb.com:24789/yomtop/recommend/ids/"+ids_string,
                 //url: "http://yomtop.sb01.stations.graphenedb.com:24789/yomtop/recommend/front_test",
-                url: "http://localhost:7474/examples/unmanaged/recommend/ids/"+ids_string,
-                username: "yomtop",
-                password: "3NcRQG27i3pWGXiCEwi4",
-                contentType: "application/json",
-                //dataType: 'application/json',
-                //data: JSON.stringify({ids: ids}),
+                url: "http://cherrychia.lyonwj.com:7474/yomtop/recommend/ids/" + ids_string,
+                //url: "http://cherrychia.lyonwj.com:7474/yomtop/recommend/ids/"+ids_string,
+                //username: "yomtop",
+                //password: "3NcRQG27i3pWGXiCEwi4",
+                contentType: "text/plain",
+                //dataType: 'a',
+                data: JSON.stringify({ids: ids}),
                 type: "GET",
-                beforeSend: function(xhr) { xhr.setRequestHeader("Authorization", "Basic " + btoa("yomtop" + ":" + "3NcRQG27i3pWGXiCEwi4")); },
+                //beforeSend: function(xhr) { xhr.setRequestHeader("Authorization", "Basic " + btoa("yomtop" + ":" + "3NcRQG27i3pWGXiCEwi4")); },
                 //success: function(data){
                 //    console.log(data);
                 //}
                 success: function(data){
+                    //$('#map').empty();
+                    //map.remove();
+                    //map = new L.Map('map', {center: new L.LatLng(33.4500, -112.0667), zoom: 10, layers: [baseLayer]});
                     var markers = [];
                     if (markerLayer){
                         map.removeLayer(markerLayer);
@@ -187,7 +190,7 @@
 
                     }
 
-                    var markerLayer = new L.layerGroup(markers);
+                    markerLayer = new L.layerGroup(markers);
                     markerLayer.addTo(map);
                 }
 
